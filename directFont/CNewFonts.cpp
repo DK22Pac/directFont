@@ -4,10 +4,12 @@
 #include "game_sa\CMessages.h"
 #include "game_sa\CHudColours.h"
 #include "translations\SanLtdTranslation.h"
+#include "translations\LatinTranslation.h"
 #include <stdio.h>
 
 using namespace plugin;
 
+extern LPDIRECT3DDEVICE9 &_RwD3DDevice;
 CD3DSprite *CNewFonts::m_pFontSprite;
 CNewFont CNewFonts::m_aFonts[4];
 eTranslation CNewFonts::m_Translation;
@@ -46,7 +48,7 @@ bool CNewFont::SetupFont(char *fontName, unsigned int width, int height, float s
 void CNewFont::PrintString(char *text, CRect const& rect, float scale_x, float scale_y, CRGBA const& color, DWORD format, CRGBA const* backgroundColor,
     float shadow, float outline, CRGBA const* dropColor)
 {
-    RECT d3drect; SetRect(&d3drect, rect.m_fLeft, rect.m_fTop, rect.m_fRight, rect.m_fBottom);
+    RECT d3drect; SetRect(&d3drect, rect.left, rect.top, rect.right, rect.bottom);
     if (backgroundColor)
         DrawRect(text, rect, scale_x, scale_y, format, *backgroundColor);
     RECT d3drect2; SetRect(&d3drect2, d3drect.left / (scale_x / 2), d3drect.top / (scale_y / 2), d3drect.right / (scale_x / 2), d3drect.bottom / (scale_y / 2));
@@ -62,46 +64,46 @@ void CNewFont::PrintString(char *text, CRect const& rect, float scale_x, float s
         shadowRect.top += shadow;
         shadowRect.bottom += shadow;
         CNewFonts::gShadow = true;
-        m_pD3DXFont->DrawText(CNewFonts::m_pFontSprite, text, -1, &shadowRect, format, D3DCOLOR_ARGB(dropColor->alpha,
-            dropColor->red, dropColor->green, dropColor->blue));
+        m_pD3DXFont->DrawText(CNewFonts::m_pFontSprite, text, -1, &shadowRect, format, D3DCOLOR_ARGB(dropColor->a,
+            dropColor->r, dropColor->g, dropColor->b));
     }
     else if (outline > 0.0f) {
         RECT outl1(d3drect2);
         outl1.left -= outline;
         outl1.right -= outline;
         CNewFonts::gShadow = true;
-        m_pD3DXFont->DrawText(CNewFonts::m_pFontSprite, text, -1, &outl1, format, D3DCOLOR_ARGB(dropColor->alpha,
-            dropColor->red, dropColor->green, dropColor->blue));
+        m_pD3DXFont->DrawText(CNewFonts::m_pFontSprite, text, -1, &outl1, format, D3DCOLOR_ARGB(dropColor->a,
+            dropColor->r, dropColor->g, dropColor->b));
         RECT outl2(d3drect2);
         outl2.left += outline;
         outl2.right += outline;
         CNewFonts::gShadow = true;
-        m_pD3DXFont->DrawText(CNewFonts::m_pFontSprite, text, -1, &outl2, format, D3DCOLOR_ARGB(dropColor->alpha,
-            dropColor->red, dropColor->green, dropColor->blue));
+        m_pD3DXFont->DrawText(CNewFonts::m_pFontSprite, text, -1, &outl2, format, D3DCOLOR_ARGB(dropColor->a,
+            dropColor->r, dropColor->g, dropColor->b));
         RECT outl3(d3drect2);
         outl3.top -= outline;
         outl3.bottom -= outline;
         CNewFonts::gShadow = true;
-        m_pD3DXFont->DrawText(CNewFonts::m_pFontSprite, text, -1, &outl3, format, D3DCOLOR_ARGB(dropColor->alpha,
-            dropColor->red, dropColor->green, dropColor->blue));
+        m_pD3DXFont->DrawText(CNewFonts::m_pFontSprite, text, -1, &outl3, format, D3DCOLOR_ARGB(dropColor->a,
+            dropColor->r, dropColor->g, dropColor->b));
         RECT outl4(d3drect2);
         outl4.top += outline;
         outl4.bottom += outline;
         CNewFonts::gShadow = true;
-        m_pD3DXFont->DrawText(CNewFonts::m_pFontSprite, text, -1, &outl4, format, D3DCOLOR_ARGB(dropColor->alpha,
-            dropColor->red, dropColor->green, dropColor->blue));
+        m_pD3DXFont->DrawText(CNewFonts::m_pFontSprite, text, -1, &outl4, format, D3DCOLOR_ARGB(dropColor->a,
+            dropColor->r, dropColor->g, dropColor->b));
     }
     CNewFonts::gNumLetters = 0;
     CNewFonts::gShadow = false;
-    m_pD3DXFont->DrawText(CNewFonts::m_pFontSprite, text, -1, &d3drect2, format, D3DCOLOR_ARGB(color.alpha,
-        color.red, color.green, color.blue));
+    m_pD3DXFont->DrawText(CNewFonts::m_pFontSprite, text, -1, &d3drect2, format, D3DCOLOR_ARGB(color.a,
+        color.r, color.g, color.b));
     CNewFonts::m_pFontSprite->SetTransform(&P);
     CNewFonts::m_pFontSprite->End();
 }
 
 void CNewFont::DrawRect(char *text, CRect const& rect, float scale_x, float scale_y, DWORD format, CRGBA const& backgroundColor) {
-    float x2 = rect.m_fRight;
-    RECT d3drect; SetRect(&d3drect, rect.m_fLeft, rect.m_fTop, rect.m_fRight, rect.m_fBottom);
+    float x2 = rect.right;
+    RECT d3drect; SetRect(&d3drect, rect.left, rect.top, rect.right, rect.bottom);
     RECT d3drect2; SetRect(&d3drect2, d3drect.left / (scale_x / 2), d3drect.top / (scale_y / 2), d3drect.right / (scale_x / 2), d3drect.bottom / (scale_y / 2));
     D3DXMATRIX S, P;
     D3DXMatrixScaling(&S, scale_x / 2, scale_y / 2, 1.0f);
@@ -206,6 +208,8 @@ void CNewFonts::Initialise() {
         m_Translation = TRANSLATION_NONE;
     else if (!strncmp(translation, "SANLTD", 6))
         m_Translation = TRANSLATION_SANLTD;
+	else if (!strncmp(translation, "LATIN", 6))
+		m_Translation = TRANSLATION_LATIN;
     else {
         Error("CNewFonts::Initialise\nUnknown translation name.");
         m_Translation = TRANSLATION_NONE;
@@ -288,7 +292,10 @@ void CNewFonts::PrintString(float x, float y, char *text) {
         if (m_Translation == TRANSLATION_SANLTD) {
             SanLtdTranslation tr;
             tr.TranslateString(taggedText);
-        }
+        } else if (m_Translation == TRANSLATION_LATIN) {
+			LatinTranslation tr;
+			tr.TranslateString(taggedText);
+		}
         if (m_aFonts[m_FontId].m_upperCase)
             _UpCase((unsigned char *)taggedText);
         if (m_aFonts[m_FontId].m_replaceUS)
@@ -309,9 +316,9 @@ HRESULT CD3DSprite::Draw(LPDIRECT3DTEXTURE9 pTexture, CONST RECT * pSrcRect, CON
     if (CNewFonts::gShadow)
         result = m_pSprite->Draw(pTexture, pSrcRect, pCenter, pPosition, Color);
     else {
-        result = m_pSprite->Draw(pTexture, pSrcRect, pCenter, pPosition, D3DCOLOR_RGBA(CNewFonts::gLetterColors[CNewFonts::gNumLetters].red,
-            CNewFonts::gLetterColors[CNewFonts::gNumLetters].green, CNewFonts::gLetterColors[CNewFonts::gNumLetters].blue, 
-            CNewFonts::gLetterColors[CNewFonts::gNumLetters].alpha));
+        result = m_pSprite->Draw(pTexture, pSrcRect, pCenter, pPosition, D3DCOLOR_RGBA(CNewFonts::gLetterColors[CNewFonts::gNumLetters].r,
+            CNewFonts::gLetterColors[CNewFonts::gNumLetters].g, CNewFonts::gLetterColors[CNewFonts::gNumLetters].b, 
+            CNewFonts::gLetterColors[CNewFonts::gNumLetters].a));
         CNewFonts::gNumLetters++;
     }
     return result;
@@ -347,49 +354,49 @@ void CNewFonts::ProcessTags(char *dest, char *src) {
                 break;
             case 'R':
             case 'r':
-                currColor = CRGBA(HudColour.GetRGB(0, CFont::m_Color->alpha));
+                currColor = CRGBA(HudColour.GetRGB(0, CFont::m_Color->a));
                 pText++;
                 break;
             case 'G':
             case 'g':
-                currColor = CRGBA(HudColour.GetRGB(1, CFont::m_Color->alpha));
+                currColor = CRGBA(HudColour.GetRGB(1, CFont::m_Color->a));
                 pText++;
                 break;
             case 'B':
             case 'b':
-                currColor = CRGBA(HudColour.GetRGB(2, CFont::m_Color->alpha));
+                currColor = CRGBA(HudColour.GetRGB(2, CFont::m_Color->a));
                 pText++;
                 break;
             case 'W':
             case 'w':
-                currColor = CRGBA(HudColour.GetRGB(4, CFont::m_Color->alpha));
+                currColor = CRGBA(HudColour.GetRGB(4, CFont::m_Color->a));
                 pText++;
                 break;
             case 'H':
             case 'h':
-                currColor = CRGBA(min((float)CFont::m_Color->red * 1.5f, 255.0f),
-                    min((float)CFont::m_Color->green * 1.5f, 255.0f),
-                    min((float)CFont::m_Color->blue * 1.5f, 255.0f),
-                    CFont::m_Color->alpha);
+                currColor = CRGBA(min((float)CFont::m_Color->r * 1.5f, 255.0f),
+                    min((float)CFont::m_Color->g * 1.5f, 255.0f),
+                    min((float)CFont::m_Color->b * 1.5f, 255.0f),
+                    CFont::m_Color->a);
                 pText++;
                 break;
             case 'Y':
             case 'y':
-                currColor = CRGBA(HudColour.GetRGB(11, CFont::m_Color->alpha));
+                currColor = CRGBA(HudColour.GetRGB(11, CFont::m_Color->a));
                 pText++;
                 break;
             case 'P':
             case 'p':
-                currColor = CRGBA(HudColour.GetRGB(7, CFont::m_Color->alpha));
+                currColor = CRGBA(HudColour.GetRGB(7, CFont::m_Color->a));
                 pText++;
                 break;
             case 'l':
-                currColor = CRGBA(HudColour.GetRGB(5, CFont::m_Color->alpha));
+                currColor = CRGBA(HudColour.GetRGB(5, CFont::m_Color->a));
                 pText++;
                 break;
             case 'S':
             case 's':
-                currColor = CRGBA(HudColour.GetRGB(4, CFont::m_Color->alpha));
+                currColor = CRGBA(HudColour.GetRGB(4, CFont::m_Color->a));
                 pText++;
                 break;
             }

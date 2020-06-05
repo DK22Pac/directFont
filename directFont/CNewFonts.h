@@ -10,7 +10,8 @@
 
 enum eTranslation {
     TRANSLATION_NONE = 0,
-    TRANSLATION_SANLTD = 1
+    TRANSLATION_SANLTD = 1,
+	TRANSLATION_LATIN = 2
 };
 
 class CNewFont {

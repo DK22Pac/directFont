@@ -1,6 +1,8 @@
 #include "CD3DSprite.h"
 #include "game_sa\RenderWare.h"
 
+LPDIRECT3DDEVICE9 &_RwD3DDevice = *(LPDIRECT3DDEVICE9*)0xC97C28;
+
 CD3DSprite::CD3DSprite() {
     D3DXCreateSprite(_RwD3DDevice, &m_pSprite);
 }
